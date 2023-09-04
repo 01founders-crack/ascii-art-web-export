@@ -79,7 +79,7 @@ func ServeTemplate(w http.ResponseWriter, r *http.Request) {
 func HandleAsciiArt(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
-		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest) //400 error
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
 	}
 
@@ -87,6 +87,15 @@ func HandleAsciiArt(w http.ResponseWriter, r *http.Request) {
 	userText := r.FormValue("text")
 	artStylePath := "ascii-art/artstyles/" + artStyle + ".txt"
 	asciiArtResult := ascii_art.AsciiArt(userText, artStylePath)
+
+	if r.FormValue("download") == "Download ASCII Art" {
+		w.Header().Set("Content-Disposition", "attachment; filename=ascii_art.txt")
+		w.Header().Set("Content-Type", "text/plain")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(asciiArtResult))
+		return
+	}
+
 	data := struct {
 		ASCIIArtResult string
 	}{

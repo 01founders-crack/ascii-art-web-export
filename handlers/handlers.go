@@ -4,11 +4,14 @@ package handlers
 
 import (
 	ascii_art "ascii-art-web/ascii-art"
+	"bytes"
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 // renderTemplateWithData renders a template with given data.
@@ -87,12 +90,13 @@ func HandleAsciiArt(w http.ResponseWriter, r *http.Request) {
 	userText := r.FormValue("text")
 	artStylePath := "ascii-art/artstyles/" + artStyle + ".txt"
 	asciiArtResult := ascii_art.AsciiArt(userText, artStylePath)
+	contentLength := fmt.Sprintf("%d", len(asciiArtResult))
 
 	if r.FormValue("download") == "Download ASCII Art" {
 		w.Header().Set("Content-Disposition", "attachment; filename=ascii_art.txt")
 		w.Header().Set("Content-Type", "text/plain")
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(asciiArtResult))
+		w.Header().Set("Content-Length", contentLength)
+		http.ServeContent(w, r, "ascii_art.txt", time.Now(), bytes.NewReader([]byte(asciiArtResult)))
 		return
 	}
 
